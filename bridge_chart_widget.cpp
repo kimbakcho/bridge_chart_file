@@ -162,7 +162,7 @@ void bridge_chart_widget::chart_timer_timeout()
     }
     int item_count = CL_series->points().size();
 
-    //case 1
+//    case 1
 //     value_series->append(CL_series->points().at(item_count-3).x(),13240);
 //     value_series->append(CL_series->points().at(item_count-2).x(),13260);
 //     value_series->append(CL_series->points().at(item_count-1).x(),15530);
@@ -290,16 +290,24 @@ void bridge_chart_widget::chart_timer_timeout()
     //KSQCase 1
     if((USL_series[0]->points().last().y() < value_series->points().last().y()) ||
        (LSL_series[0]->points().last().y() > value_series->points().last().y()) ){
-        KSQ_chart_draw(4);
+        KSQ_chart_draw(4,1);
         email_data->match_case[0] = true;
 
-        email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ1");
+
         main_query.last();
+        email_data->filenames<<" <p> case KSQ 1 </p><br> \n <p>ULC or LCL 을 이탈</p> <br> \n";
+        email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ1");
         QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-        email_data->filenames<<" <p> case KSQ 1 mactch</p><br> \n <p>1점이 영역 A를 넘고 있다.</p> <br> \n";
-        QString content = QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span>  <span style=color:red>(A = %6)</span>   <span style=color:blue>(A = %7)</span></p>  <br> \n")
+        email_data->filenames<<"<p>total image </p><br>";
+        email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
+        QString content;
+        content.append("\n <table> \n  <tbody> \n ");
+        content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n  <td> UCL </td> \n <td> LCL </td> \n </tr> \n");
+        content.append(QString(" <tr> <td>[%1]</td> \n <td> %2 </td> \n <td> %3 </td> \n <td>%4 </td> \n <td> <span style=color:blue>%5</span> </td> \n "
+                               "<td> <span style=color:red>%6</span> </td> \n <td> <span style=color:blue> %7 </span></td> \n </tr> \n")
                 .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
-                .arg(value_series->points().last().y()).arg(USL_series[0]->points().last().y()).arg(LSL_series[0]->points().last().y());
+                .arg(value_series->points().last().y()).arg(USL_series[0]->points().last().y()).arg(LSL_series[0]->points().last().y()));
+        content.append("\n </tbody>  \n </table> \n");
         email_data->filenames<<content;
         qDebug()<<"case KSQ 1 mactch";
     }
@@ -323,12 +331,18 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(KSQ2_flag1||KSQ2_flag2){
-            KSQ_chart_draw(12);
+            KSQ_chart_draw(12,9);
             email_data->match_case[1] = true;
 
+            email_data->filenames<<" <p> case KSQ 2 </p> <br> \n <p> 연속하는 9개 data가 중심선의 한쪽에 있다. </p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ2");
-            email_data->filenames<<" <p> case KSQ 2 mactch </p> <br> \n <p> 9점이 중심선에 대하여 같은 쪽에 있다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
+
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n  <td> CL </td> \n </tr> \n");
             for(int i=1;i<=9;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -337,10 +351,11 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> (CL = %6) </p> <br> \n")
+                content.append(QString(" <tr> <td> [%1]></td> \n <td> %2 </td> \n <td> %3 </td> \n <td> %4 </td> \n <td><span style=color:blue>%5</span> </td> \n <td>%6</td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()).arg(CL_series->points().at(item_size-i).y()));
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
             qDebug()<<"case KSQ 2 mactch";
 
@@ -370,12 +385,18 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(KSQ3_flag1 || KSQ3_flag2){
-            KSQ_chart_draw(7);
+            KSQ_chart_draw(7,5);
             email_data->match_case[2] = true;
 
+            email_data->filenames<<" <p> case KSQ 3 </p> <br> \n<p> 연속하는 6개 dtaa가 증가 또는 감소 한다. </p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ3");
-            email_data->filenames<<" <p> case KSQ 3 mactch </p> <br> \n<p> 6점이 연속적으로 증가 또는 감소하고 있다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
+
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n  </tr> \n");
             for(int i=1;i<=6;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -384,10 +405,11 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> </p> <br> \n")
+                content.append(QString(" <tr> <td>[%1]</td> \n <td> %2 </td> \n <td> %3 </td> \n <td> %4 </td> \n <td> <span style=color:blue>%5</span> </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()));
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
             qDebug()<<"case KSQ 3 mactch";
         }
@@ -413,12 +435,17 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(KSQ4_flag){
-            KSQ_chart_draw(14);
+            KSQ_chart_draw(14,14);
             email_data->match_case[3] = true;
-
+            email_data->filenames<<" <p> case KSQ 4</p> <br> \n <p> 연속 하는 14개 데이터가 교대로 증가 감소한다.</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ4");
-            email_data->filenames<<" <p> case KSQ 4 mactch </p> <br> \n <p> 14점이 교대로 증감하고 있다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
+
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n  </tr> \n");
             for(int i=1;i<=14;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -427,10 +454,11 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p>[%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> </p> <br> \n")
+                content.append(QString(" <tr> <td>[%1]</td> \n <td>%2 </td> <td> %3 </td> \n <td> %4 </td> \n <td> <span style=color:blue>%5</span> </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()));
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
 
             qDebug()<<"case KSQ 4 mactch";
@@ -453,12 +481,17 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(match_A_count >= 2){
-            KSQ_chart_draw(5);
+            KSQ_chart_draw(5,3);
             email_data->match_case[4] = true;
 
+            email_data->filenames<<" <p> case KSQ 5</p> <br> \n <p> 연속 하는 3data 중 2data 가 2σ~3σ,-2σ~-3σ 사이에 존재 한다. </p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ5");
-            email_data->filenames<<" <p> case KSQ 5 mactch </p> <br> \n <p> 연속하는 3점 중 2점이 A영역에 있다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> 2σ ~ 3σ </td> \n <td> -2σ ~ -3σ </td> \n  </tr> \n");
             for(int i=1;i<=3;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -467,10 +500,12 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> <span style=color:red> (A = %6 ~ %7) </span> <span style=color:blue> (A = %8 ~ %9) </span> </p> <br> \n")
+                content.append(QString(" <tr> <td>[%1]</td> \n <td> %2 </td> \n <td> %3 </td> <td> %4 </td> \n <td><span style=color:blue>%5</span> </td> \n <td> <span style=color:red> %6 ~ %7 </span> </td> \n "
+                                       "<td> <span style=color:blue> %8 ~ %9 </span> </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()).arg(USL_series[1]->points().at(item_size-i).y()).arg(USL_series[0]->points().at(item_size-i).y()).arg(LSL_series[1]->points().at(item_size-i).y()).arg(LSL_series[0]->points().at(item_size-i).y()));
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
 
             qDebug()<<"case KSQ 5 mactch";
@@ -489,12 +524,16 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(match_B_up_count >= 4){
-            KSQ_chart_draw(5);
+            KSQ_chart_draw(5,5);
             email_data->match_case[5] = true;
-
+            email_data->filenames<<" <p> case KSQ 6</p> <br> \n <p> 연속 하는 5data 중 4data 가 1σ~3σ,-1σ~-3σ 에 있다.</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ6");
-            email_data->filenames<<" <p> case KSQ 6 mactch </p> <br> \n <p> 연속하는 5점중 4점이 B 영역 또는 그것을 넘는 영역에 있다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> +2σ </td> \n <td> -2σ </td> \n  </tr> \n");
             for(int i=1;i<=5;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -503,10 +542,13 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p>  [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> <span style=color:red> (B = %6) </span> <span style=color:blue>(B = %7) </span> </p> <br> \n")
+
+                content.append(QString(" <tr> \n <td> [%1] </td> \n <td> %2 </td> \n <td> %3 </td> \n <td> %4 </td> \n <td> <span style=color:blue>측정값 = %5</span> </td> \n "
+                                       "<td> <span style=color:red> %6 </span> </td> \n <td> <span style=color:blue>%7 </span> </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()).arg(USL_series[2]->points().at(item_size-i).y()).arg(LSL_series[2]->points().at(item_size-i).y()));
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
             qDebug()<<"case KSQ 6 mactch";
         }
@@ -523,12 +565,17 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(match_C_count >= 15){
-            KSQ_chart_draw(20);
+            KSQ_chart_draw(20,15);
             email_data->match_case[6] = true;
 
+            email_data->filenames<<" <p> case KSQ 7 </p> <br> \n  <p> 연속하는 15개 data가 -1σ~1σ 사이에 존재 한다. </p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ7");
-            email_data->filenames<<" <p> case KSQ 7 mactch </p> <br> \n  <p> 연속하는 15점이 C영역에 존재한다. </p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> -1σ </td> \n <td> +1σ </td> \n  </tr> \n");
             for(int i=1;i<=15;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -537,10 +584,13 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> (-C~+C = %6 ~ %7) </p> <br> \n")
+
+                content.append(QString(" <tr> \n <td> [%1] </td> \n <td> %2 </td> \n <td> %3 </td> \n <td> %4 </td> \n <td> <span style=color:blue>%5</span> </td> \n <td>%6</td> \n <td> %7 </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()).arg(LSL_series[2]->points().at(item_size-i).y()).arg(USL_series[2]->points().at(item_size-i).y()));
+
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
             qDebug()<<"case KSQ 7 mactch";
 
@@ -558,12 +608,18 @@ void bridge_chart_widget::chart_timer_timeout()
             }
         }
         if(match_miss_C_count >= 5){
-            KSQ_chart_draw(8);
+            KSQ_chart_draw(8,5);
             email_data->match_case[7] = true;
 
+            email_data->filenames<<" <p> case KSQ 8 </p ><br> \n <p>연속 5data가 -1σ~1σ 이외 영역에 있다.</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ8");
-            email_data->filenames<<" <p> case KSQ 8 mactch </p ><br> \n <p>연속하는 5점이 상하 관계 없이 C 영역을 넘는 영역에 있다.</p> <br> \n";
+
+            email_data->filenames<<"<p>total image </p><br>";
+            email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
+
             QString content;
+            content.append("\n <table> \n  <tbody> \n ");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> +1σ </td> \n <td> -1σ </td> \n  </tr> \n");
             for(int i=1;i<=5;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -572,17 +628,20 @@ void bridge_chart_widget::chart_timer_timeout()
                     main_query.previous();
                 }
                 QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
-                content.append(QString(" <p> [%1] %2 / %3 / %4 / <span style=color:blue>측정값 = %5</span> 측정값 %5 <span style=color:red>(+C = %6) </span> <span style=color:blue>(-C = %7) </span> </p> <br> \n")
+
+                content.append(QString(" <tr> \n <td> [%1] </td> \n <td> %2 </td> \n <td> %3 </td> \n <td> %4 </td> \n <td> <span style=color:blue>측정값 = %5</span> </td> \n "
+                                       "<td> <span style=color:red>%6</span></td> \n <td> <span style=color:blue>%7</span> </td> \n </tr> \n")
                                .arg(point_time.toString("MM-dd hh:mm:ss")).arg(main_query.value("EQUIPMENT_NAME").toString()).arg(main_query.value("MATERIAL_ID").toString()).arg(main_query.value("LOT_ID").toString())
                                .arg(value_series->points().at(item_size-i).y()).arg(USL_series[2]->points().at(item_size-i).y()).arg(LSL_series[2]->points().at(item_size-i).y()));
+
             }
+            content.append("\n </tbody>  \n </table> \n");
             email_data->filenames<<content;
             qDebug()<<"case KSQ 8 mactch";
         }
     }
     if(email_data->check_send_email()){
-        email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
-        email_data->filenames<<"<p>total image </p><br>";
+
         email_send(email_data);
     }
 
@@ -628,14 +687,13 @@ void bridge_chart_widget::email_send(send_email_data *email_data)
     QString sorce_content;
     for(int i=0;i<sizeof(email_data->match_case);i++){
         if(email_data->match_case[i]){
+             sorce_content.append(email_data->filenames.takeFirst());
+              sorce_content.append(email_data->filenames.takeFirst());
             sorce_content.append(email_data->filenames.takeFirst());
             sorce_content.append(email_data->filenames.takeFirst());
             sorce_content.append(email_data->filenames.takeFirst());
         }
     }
-    //total imgae
-    sorce_content.append(email_data->filenames.takeFirst());
-    sorce_content.append(email_data->filenames.takeFirst());
 
     email_content = email_content.replace("bridge_conent",sorce_content);
 
@@ -665,7 +723,7 @@ void bridge_chart_widget::email_send(send_email_data *email_data)
 
 }
 
-void bridge_chart_widget::KSQ_chart_draw(int count)
+void bridge_chart_widget::KSQ_chart_draw(int count,int errcount)
 {
 
     QList <QPointF> values = value_series->points();
@@ -719,14 +777,29 @@ void bridge_chart_widget::KSQ_chart_draw(int count)
 
     KSQ_value_series->setPointsVisible(true);
 
+    ksqmatch_series_total = new QLineSeries();
+    QPen temp_pen1 = ksqmatch_series_total->pen();
+    temp_pen1.setColor(QColor("#ff0004"));
+    temp_pen1.setWidth(3);
+    ksqmatch_series_total->setPen(temp_pen1);
+    ksqmatch_series_total->setPointsVisible(true);
 
-
+    ksqmatch_series_ksq = new QLineSeries();
+    temp_pen1 = ksqmatch_series_ksq->pen();
+    temp_pen1.setColor(QColor("#ff0004"));
+    temp_pen1.setWidth(3);
+    ksqmatch_series_ksq->setPen(temp_pen1);
+    ksqmatch_series_ksq->setPointsVisible(true);
     int i=0;
     while(!values.isEmpty()){
           if(i > count){
             break;
           }
           KSQ_value_series->append(values.back().x(),values.back().y());
+          if(i < errcount){
+            ksqmatch_series_total->append(values.back().x(),values.back().y());
+            ksqmatch_series_ksq->append(values.back().x(),values.back().y());
+          }
           values.pop_back();
           KSQ_USL_series[0]->append(USL_series_values[0].back().x(),USL_series_values[0].back().y());
           USL_series_values[0].pop_back();
@@ -752,6 +825,8 @@ void bridge_chart_widget::KSQ_chart_draw(int count)
     KSQ_chart->addSeries(KSQ_LSL_series[1]);
     KSQ_chart->addSeries(KSQ_LSL_series[2]);
     KSQ_chart->addSeries(KSQ_CL_series);
+    main_chart->addSeries(ksqmatch_series_total);
+    KSQ_chart->addSeries(ksqmatch_series_ksq);
 
     KSQ_axisX = new QDateTimeAxis;
     KSQ_axisX->setTickCount(5);
@@ -780,6 +855,11 @@ void bridge_chart_widget::KSQ_chart_draw(int count)
     KSQ_LSL_series[2]->attachAxis(KSQ_axisY);
     KSQ_CL_series->attachAxis(KSQ_axisX);
     KSQ_CL_series->attachAxis(KSQ_axisY);
+    ksqmatch_series_total->attachAxis(main_chart->axisX());
+    ksqmatch_series_total->attachAxis(main_chart->axisY());
+    ksqmatch_series_ksq->attachAxis(KSQ_axisX);
+    ksqmatch_series_ksq->attachAxis(KSQ_axisY);
+
 
 
 

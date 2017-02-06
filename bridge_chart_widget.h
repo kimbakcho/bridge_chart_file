@@ -45,6 +45,8 @@ public:
     QSqlDatabase my_db;
     QSqlDatabase ms_mes_db;
     QLineSeries *value_series;
+    QLineSeries *ksqmatch_series_total;
+    QLineSeries *ksqmatch_series_ksq;
     QLineSeries *CL_series;
     QLineSeries *USL_series[3];
     QLineSeries *LSL_series[3];
@@ -67,7 +69,7 @@ public:
 
     QString make_image_file(QDateTime currentdatetime, QWidget *pictuerwidget, QString pickture_name);
 
-    void KSQ_chart_draw(int count);
+    void KSQ_chart_draw(int count, int errcount);
 
     void email_send(send_email_data *email_data);
     ~bridge_chart_widget();
