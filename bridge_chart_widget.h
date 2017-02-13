@@ -16,6 +16,7 @@
 #include <smtp/SmtpMime>
 #include <QThread>
 #include <QEventLoop>
+#include <QScatterSeries>
 class send_email_data {
 public:
     send_email_data();
@@ -44,8 +45,8 @@ public:
     QTimer charttimer;
     QSqlDatabase my_db;
     QSqlDatabase ms_mes_db;
-    QLineSeries *value_series;
-    QLineSeries *ksqmatch_series_total;
+    QScatterSeries *value_series;
+    QScatterSeries *ksqmatch_series_total;
     QLineSeries *ksqmatch_series_ksq;
     QLineSeries *CL_series;
     QLineSeries *USL_series[3];

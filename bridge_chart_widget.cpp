@@ -102,7 +102,9 @@ void bridge_chart_widget::chart_timer_timeout()
                                 "b.TARGET_VALUE,b.UPPER_SPEC_LIMIT,b.LOWER_SPEC_LIMIT,b.UPPER_WARN_LIMIT,b.LOWER_WARN_LIMIT  "
                                 "FROM [MESDB].[dbo].[NM_EDC_LOTS] a,[MESDB].[dbo].[NM_COLLECTION_CHARACTERS] b,[MESDB].[dbo].[NM_EQUIPMENT] c "
                                 "where a.COLLECTION_ID = 'Bridge_Thickness'  AND a.CHARACTER_ID = 'Bridge_Thickness' AND  a.CHARACTER_ID = b.CHARACTER_ID AND a.COLLECTION_ID = b.COLLECTION_ID AND a.COLLECTION_VERSION = b.COLLECTION_VERSION AND a.EQUIPMENT_ID = c.EQUIPMENT_ID AND "
-                                "(TX_DTTM between '%1' AND '%2')  order by TX_DTTM asc").arg(search_start_time.toString("yyyyMMddhhmmss")).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmmss"));
+                                "(TX_DTTM between '%1' AND '%2')  order by TX_DTTM asc").arg(search_start_time.toString("yyyyMMddhhmmss"))
+            .arg(QDateTime::currentDateTime().toString("yyyyMMddhhmmss"));
+
 
     main_query.exec(query_txt2);
     main_chart->removeAllSeries();
@@ -112,13 +114,15 @@ void bridge_chart_widget::chart_timer_timeout()
     if(main_chart->axisY() != NULL){
         main_chart->removeAxis(main_chart->axisY());
     }
-    QPen temp_pen;
-    value_series = new QLineSeries;
+//    QPen temp_pen;
+    value_series = new QScatterSeries;
     value_series->setName("value");
     value_series->setColor(QColor("#141414"));
-    temp_pen = value_series->pen();
-    temp_pen.setWidthF(2);
-    value_series->setPen(temp_pen);
+//    temp_pen = value_series->pen();
+//    temp_pen.setWidthF(2);
+//    value_series->setPen(temp_pen);
+    value_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+    value_series->setMarkerSize(10.0);
 
     CL_series = new QLineSeries;
     CL_series->setColor(QColor("#47ff53"));
@@ -777,11 +781,15 @@ void bridge_chart_widget::KSQ_chart_draw(int count,int errcount)
 
     KSQ_value_series->setPointsVisible(true);
 
-    ksqmatch_series_total = new QLineSeries();
+    ksqmatch_series_total = new QScatterSeries();
+    ksqmatch_series_total->setColor(QColor("#ff0004"));
     QPen temp_pen1 = ksqmatch_series_total->pen();
-    temp_pen1.setColor(QColor("#ff0004"));
-    temp_pen1.setWidth(3);
-    ksqmatch_series_total->setPen(temp_pen1);
+//    temp_pen1.setColor(QColor("#ff0004"));
+//    temp_pen1.setWidth(3);
+    ksqmatch_series_total->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+    ksqmatch_series_total->setMarkerSize(11.0);
+
+//    ksqmatch_series_total->setPen(temp_pen1);
     ksqmatch_series_total->setPointsVisible(true);
 
     ksqmatch_series_ksq = new QLineSeries();
