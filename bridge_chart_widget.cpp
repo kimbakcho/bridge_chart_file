@@ -107,13 +107,18 @@ void bridge_chart_widget::chart_timer_timeout()
 
 
     main_query.exec(query_txt2);
-    main_chart->removeAllSeries();
-    if(main_chart->axisX() != NULL){
-        main_chart->removeAxis(main_chart->axisX());
+    bridge_chart *temp_chart = main_chart;
+    main_chart = new bridge_chart();
+    main_chartview->setChart(main_chart);
+
+    temp_chart->removeAllSeries();
+    if(temp_chart->axisX() != NULL){
+        temp_chart->removeAxis(temp_chart->axisX());
     }
-    if(main_chart->axisY() != NULL){
-        main_chart->removeAxis(main_chart->axisY());
+    if(temp_chart->axisY() != NULL){
+        temp_chart->removeAxis(temp_chart->axisY());
     }
+
 //    QPen temp_pen;
     value_series = new QScatterSeries;
     value_series->setName("value");
@@ -299,7 +304,7 @@ void bridge_chart_widget::chart_timer_timeout()
 
 
         main_query.last();
-        email_data->filenames<<" <p> case KSQ 1 </p><br> \n <p>ULC or LCL 을 이탈</p> <br> \n";
+        email_data->filenames<<" <p> case 1 </p><br> \n";
         email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ1");
         QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
         email_data->filenames<<"<p>total image </p><br>";
@@ -338,7 +343,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(12,9);
             email_data->match_case[1] = true;
 
-            email_data->filenames<<" <p> case KSQ 2 </p> <br> \n <p> 연속하는 9개 data가 중심선의 한쪽에 있다. </p> <br> \n";
+            email_data->filenames<<" <p> case 2 </p> <br> \n ";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ2");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -392,7 +397,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(7,5);
             email_data->match_case[2] = true;
 
-            email_data->filenames<<" <p> case KSQ 3 </p> <br> \n<p> 연속하는 6개 dtaa가 증가 또는 감소 한다. </p> <br> \n";
+            email_data->filenames<<" <p> case 3 </p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ3");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -441,7 +446,7 @@ void bridge_chart_widget::chart_timer_timeout()
         if(KSQ4_flag){
             KSQ_chart_draw(14,14);
             email_data->match_case[3] = true;
-            email_data->filenames<<" <p> case KSQ 4</p> <br> \n <p> 연속 하는 14개 데이터가 교대로 증가 감소한다.</p> <br> \n";
+            email_data->filenames<<" <p> case 4</p> <br> \n ";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ4");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -488,7 +493,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(5,3);
             email_data->match_case[4] = true;
 
-            email_data->filenames<<" <p> case KSQ 5</p> <br> \n <p> 연속 하는 3data 중 2data 가 2σ~3σ,-2σ~-3σ 사이에 존재 한다. </p> <br> \n";
+            email_data->filenames<<" <p> case 5</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ5");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -530,7 +535,7 @@ void bridge_chart_widget::chart_timer_timeout()
         if(match_B_up_count >= 4){
             KSQ_chart_draw(5,5);
             email_data->match_case[5] = true;
-            email_data->filenames<<" <p> case KSQ 6</p> <br> \n <p> 연속 하는 5data 중 4data 가 1σ~3σ,-1σ~-3σ 에 있다.</p> <br> \n";
+            email_data->filenames<<" <p> case 6</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ6");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -572,7 +577,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(20,15);
             email_data->match_case[6] = true;
 
-            email_data->filenames<<" <p> case KSQ 7 </p> <br> \n  <p> 연속하는 15개 data가 -1σ~1σ 사이에 존재 한다. </p> <br> \n";
+            email_data->filenames<<" <p> case 7</p> <br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ7");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -615,7 +620,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(8,5);
             email_data->match_case[7] = true;
 
-            email_data->filenames<<" <p> case KSQ 8 </p ><br> \n <p>연속 5data가 -1σ~1σ 이외 영역에 있다.</p> <br> \n";
+            email_data->filenames<<" <p> case 8 </p ><br> \n";
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ8");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -741,13 +746,17 @@ void bridge_chart_widget::KSQ_chart_draw(int count,int errcount)
     LSL_series_values[0] = LSL_series[0]->points();
     LSL_series_values[1] = LSL_series[1]->points();
     LSL_series_values[2] = LSL_series[2]->points();
-    KSQ_chart->removeAllSeries();
+    bridge_chart *temp_chart = KSQ_chart;
+    KSQ_chart = new bridge_chart();
+    KSQ_chartview->setChart(KSQ_chart);
+    temp_chart->removeAllSeries();
     if(KSQ_chart->axisX() != NULL){
-        KSQ_chart->removeAxis(KSQ_chart->axisX());
+        temp_chart->removeAxis(temp_chart->axisX());
     }
-    if(KSQ_chart->axisY() != NULL){
-        KSQ_chart->removeAxis(KSQ_chart->axisY());
+    if(temp_chart->axisY() != NULL){
+        temp_chart->removeAxis(temp_chart->axisY());
     }
+    temp_chart->deleteLater();
     QPen temp_pen;
     KSQ_value_series = new QLineSeries;
     KSQ_value_series->setName("value");
