@@ -74,7 +74,7 @@ bridge_chart_widget::~bridge_chart_widget()
 void bridge_chart_widget::chart_timer_timeout()
 {
     QSqlQuery main_query(ms_mes_db);
-
+    mail_subname = "FAB bridge ";
     QDateTime search_start_time;
     QDateTime search_end_time;
     search_start_time.setDate(QDate::currentDate().addDays(-7));
@@ -305,6 +305,7 @@ void bridge_chart_widget::chart_timer_timeout()
 
         main_query.last();
         email_data->filenames<<" <p> case 1 </p><br> \n";
+        mail_subname.append("|ULC or LCL 을 이탈| ");
         email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ1");
         QDateTime point_time = QDateTime::fromString(main_query.value("TX_DTTM").toString(),"yyyyMMddhhmmss");
         email_data->filenames<<"<p>total image </p><br>";
@@ -344,7 +345,9 @@ void bridge_chart_widget::chart_timer_timeout()
             email_data->match_case[1] = true;
 
             email_data->filenames<<" <p> case 2 </p> <br> \n ";
+            mail_subname.append("|연속 9개 data 중심선 한쪽 위치| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ2");
+
 
             email_data->filenames<<"<p>total image </p><br>";
             email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
@@ -398,6 +401,7 @@ void bridge_chart_widget::chart_timer_timeout()
             email_data->match_case[2] = true;
 
             email_data->filenames<<" <p> case 3 </p> <br> \n";
+            mail_subname.append("|연속 6개 data 증가 또는 감소| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ3");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -447,6 +451,7 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(14,14);
             email_data->match_case[3] = true;
             email_data->filenames<<" <p> case 4</p> <br> \n ";
+            mail_subname.append("|연속 14개 data 교대로 증감| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ4");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -494,6 +499,7 @@ void bridge_chart_widget::chart_timer_timeout()
             email_data->match_case[4] = true;
 
             email_data->filenames<<" <p> case 5</p> <br> \n";
+            mail_subname.append("|연속 3개 data 중 2개 data : (2σ~3σ),(-2σ~-3σ) 구간 존재| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ5");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -536,13 +542,14 @@ void bridge_chart_widget::chart_timer_timeout()
             KSQ_chart_draw(5,5);
             email_data->match_case[5] = true;
             email_data->filenames<<" <p> case 6</p> <br> \n";
+            mail_subname.append("|연속 5개 data 중 4개 data :(1σ~3σ),(-1σ~-3σ) 구간 존재| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ6");
 
             email_data->filenames<<"<p>total image </p><br>";
             email_data->filenames<<make_image_file(current_datetime,main_chartview,"total");
             QString content;
             content.append("\n <table> \n  <tbody> \n ");
-            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> +2σ </td> \n <td> -2σ </td> \n  </tr> \n");
+            content.append("<tr> \n <td> 시간 </td> \n <td> 설비이름 </td> \n  <td> MATERIAL_ID </td> \n  <td> LOT_ID </td> \n  <td> 측정값 </td> \n <td> +1σ </td> \n <td> -1σ </td> \n  </tr> \n");
             for(int i=1;i<=5;i++){
                 int item_size = value_series->points().size();
                 if(i == 1){
@@ -578,6 +585,7 @@ void bridge_chart_widget::chart_timer_timeout()
             email_data->match_case[6] = true;
 
             email_data->filenames<<" <p> case 7</p> <br> \n";
+            mail_subname.append("|연속 15개 data:(-1σ~1σ) 구간 존재| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ7");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -621,6 +629,7 @@ void bridge_chart_widget::chart_timer_timeout()
             email_data->match_case[7] = true;
 
             email_data->filenames<<" <p> case 8 </p ><br> \n";
+            mail_subname.append("|연속 5개 data:(-1σ~1σ) 이외 영역 존재| ");
             email_data->filenames<<make_image_file(current_datetime,ui->KSQ_widget,"KSQ8");
 
             email_data->filenames<<"<p>total image </p><br>";
@@ -708,8 +717,8 @@ void bridge_chart_widget::email_send(send_email_data *email_data)
 
     EmailAddress sender("automail@wisol.co.kr", "automail");
     message.setSender(&sender);
-
-    message.setSubject("FAB bridge 두께 KS Q 판정 mail 입니다.");
+    mail_subname.append("입니다. ");
+    message.setSubject(mail_subname);
 
     MimeHtml html;
 

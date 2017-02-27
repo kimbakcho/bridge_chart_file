@@ -64,6 +64,8 @@ public:
     QDateTimeAxis *KSQ_axisX ;
     QValueAxis *KSQ_axisY;
 
+    QString mail_subname;
+
     int run_count;
 
     int x;
